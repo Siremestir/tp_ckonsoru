@@ -4,7 +4,9 @@
  * and open the template in the editor.
  */
 package com.fges.ckonsoru.view;
+import com.fges.ckonsoru.observables.RendezVousSupprObservable;
 import com.fges.ckonsoru.dao.DisponibilitesDAO;
+import com.fges.ckonsoru.dao.ListeAttenteDAO;
 import com.fges.ckonsoru.dao.RendezVousDAO;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -19,13 +21,15 @@ public class Console {
     protected HashMap<Integer,ActionConsole> actionsParNumero;
     
     public Console(DisponibilitesDAO disponibilitesDAO,
-                   RendezVousDAO rdvDAO){
+                   RendezVousDAO rdvDAO,
+                   ListeAttenteDAO laDAO,
+                   RendezVousSupprObservable observable){
         actionsParNumero = new HashMap<>();
         InitApp action0 =
                 new InitApp(0,"Initialiser une semaine complète [DEV]",rdvDAO,disponibilitesDAO);
         actionsParNumero.put(0,action0);
         AfficheCreneauxDateAction action1 = 
-            new AfficheCreneauxDateAction(1,"Afficher les créneaux disponibles pour une date donnée",disponibilitesDAO);
+            new AfficheCreneauxDateAction(1,"Afficher les créneaux disponibles pour une date donnée",disponibilitesDAO,laDAO);
         actionsParNumero.put(1,action1);
         ListeRdvClientAction action2 = 
             new ListeRdvClientAction(2, "Lister les rendez-vous passés, présent et à venir d'un client",rdvDAO);
@@ -34,11 +38,14 @@ public class Console {
             new PrendreRdvAction(3, "Prendre un rendez-vous",rdvDAO);
         actionsParNumero.put(3,action3);
         SupprimerRdvAction action4 =
-            new SupprimerRdvAction(4, "Supprimer un rendez-vous",rdvDAO);
+            new SupprimerRdvAction(4, "Supprimer un rendez-vous",rdvDAO,laDAO, observable);
         actionsParNumero.put(4, action4);
         ListeAnnulationsAction action5 =
-                new ListeAnnulationsAction(5, "Afficher les rendez-vous annulés",rdvDAO);
+            new ListeAnnulationsAction(5, "Afficher les rendez-vous annulés",rdvDAO);
         actionsParNumero.put(5, action5);
+        ListeAttenteAction action6 =
+            new ListeAttenteAction(6, "Afficher la liste d'attente",laDAO);
+        actionsParNumero.put(6, action6);
     }
     
     public void afficheMenu(){

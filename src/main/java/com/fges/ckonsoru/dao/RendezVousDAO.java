@@ -53,4 +53,10 @@ public interface RendezVousDAO {
      * @return
      **/
     public List<RendezVous> listeRendezVousAnnules();
+
+    /**
+     * Enregistre une annulation de rendez-vous
+     * @param rendezVous
+     */
+    public void enregistrerAnnulation(RendezVous rendezVous);
 }

@@ -21,6 +21,25 @@ public class ListeAttente {
     protected LocalDateTime creneauPropose;
     protected String nomVeto;
 
+    public ListeAttente(String nomClient, String numTel, LocalDateTime creneauPropose){
+        this.nomClient = nomClient;
+        this.numTel = numTel;
+        this.creneauPropose = creneauPropose;
+    }
+
+    public ListeAttente(String nomClient, String numTel, LocalDate dateAuPlusTard){
+        this.nomClient = nomClient;
+        this.numTel = numTel;
+        this.dateAuPlusTard = dateAuPlusTard;
+    }
+
+    public ListeAttente(String nomClient, String numTel, LocalDateTime creneauPropose, String nomVeto){
+        this.nomClient = nomClient;
+        this.numTel = numTel;
+        this.creneauPropose = creneauPropose;
+        this.nomVeto = nomVeto;
+    }
+
     public int getId() {
         return id;
     }

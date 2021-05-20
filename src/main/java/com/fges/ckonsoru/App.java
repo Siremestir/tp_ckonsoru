@@ -6,19 +6,20 @@
 package com.fges.ckonsoru;
 
 import com.fges.ckonsoru.dao.DisponibilitesDAO;
+import com.fges.ckonsoru.dao.ListeAttenteDAO;
 import com.fges.ckonsoru.dao.RendezVousDAO;
 import com.fges.ckonsoru.dao.postgres.DisponibilitesDaoPostgres;
+import com.fges.ckonsoru.dao.postgres.ListeAttenteDaoPostgres;
 import com.fges.ckonsoru.dao.postgres.PostgresConnexion;
 import com.fges.ckonsoru.dao.postgres.RendezVousDaoPostgres;
 import com.fges.ckonsoru.dao.xml.DisponibilitesDaoXML;
 import com.fges.ckonsoru.dao.xml.RendezVousDaoXML;
 import com.fges.ckonsoru.dao.xml.XmlDatabaseFile;
-import com.fges.ckonsoru.model.Disponibilite;
+import com.fges.ckonsoru.observables.RendezVousSupprObservableImpl;
+import com.fges.ckonsoru.observers.SuggestionCreneau;
+import com.fges.ckonsoru.observers.TracageAnnulation;
 import com.fges.ckonsoru.view.Console;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -43,6 +44,7 @@ public class App {
         // init des DAO
         DisponibilitesDAO disponibilitesDAO=null;
         RendezVousDAO rdvDAO=null;
+        ListeAttenteDAO laDAO = null;
         
         // init DAO postgres
         if(properties.getProperty("persistence").compareTo(PERSISTENCE_BDD)==0){
@@ -50,6 +52,7 @@ public class App {
                 PostgresConnexion pgConn = PostgresConnexion.getInstance(properties);
                 disponibilitesDAO = new DisponibilitesDaoPostgres(pgConn);
                 rdvDAO = new RendezVousDaoPostgres(pgConn);
+                laDAO = new ListeAttenteDaoPostgres(pgConn);
                 
             }catch(SQLException sqle){
                 System.err.println("Problème de connexion à la base de données " + sqle.getMessage());
@@ -62,10 +65,19 @@ public class App {
             rdvDAO = new RendezVousDaoXML(xdf);
             disponibilitesDAO = new DisponibilitesDaoXML(xdf,(RendezVousDaoXML) rdvDAO); 
         }
+
+        // init observable et observateurs
+        RendezVousSupprObservableImpl observable = new RendezVousSupprObservableImpl();
+        TracageAnnulation tracageAnnulation = new TracageAnnulation(rdvDAO);
+        SuggestionCreneau suggestionCreneau = new SuggestionCreneau(laDAO);
+
+        // ajout des observateurs
+        observable.enregistrerObservateur(tracageAnnulation);
+        observable.enregistrerObservateur(suggestionCreneau);
          
         // lancement de la console
-        Console console = new Console(disponibilitesDAO, rdvDAO);
-        console.traiterAction();    
+        Console console = new Console(disponibilitesDAO, rdvDAO, laDAO, observable);
+        console.traiterAction();
         
         // fermeture de l'appli
         if(properties.getProperty("persistence").compareTo(PERSISTENCE_BDD)==0){

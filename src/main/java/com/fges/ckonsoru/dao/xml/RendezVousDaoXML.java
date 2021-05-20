@@ -141,6 +141,11 @@ public class RendezVousDaoXML
         return null;
     }
 
+    @Override
+    public void enregistrerAnnulation(RendezVous rendezVous) {
+
+    }
+
     protected RendezVous mapElementToRendezVous(Element eElement){
         String debut = eElement.getElementsByTagName("debut").item(0).getTextContent();
         String client = eElement.getElementsByTagName("client").item(0).getTextContent();

@@ -10,6 +10,7 @@ import com.fges.ckonsoru.model.RendezVous;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -143,6 +144,35 @@ public class RendezVousDaoPostgres
             System.err.println(ex.getMessage());
         }
         return rdvs;
+    }
+
+    @Override
+    public void enregistrerAnnulation(RendezVous rendezVous) {
+        try {
+            PreparedStatement st = this.postgresConnexion.conn.prepareStatement(
+                    "INSERT INTO annulation \n" +
+                            "(ann_client, ann_creneau, vet_id, ann_delai)\n" +
+                            "VALUES (?, ?,\n" +
+                            "(SELECT vet_id FROM rendezvous\n" +
+                            "       WHERE rv_client = ?\n" +
+                            "       AND rv_debut = ?),\n" +
+                            "?);");
+            st.setObject(1,rendezVous.getNomClient());
+            st.setObject(2, rendezVous.getDate());
+            st.setObject(3, rendezVous.getNomClient());
+            st.setObject(4, rendezVous.getDate());
+            Duration dDelai = Duration.between(LocalDateTime.now(), rendezVous.getDate());
+
+            LocalTime delai = LocalTime.of((int) dDelai.toHours(),
+                                    (int) dDelai.toMinutes() % 60,
+                                    (int) dDelai.toSeconds() % 60);
+            st.setObject(5, delai);
+            st.executeUpdate();
+
+        }catch(SQLException e){
+            System.err.println("Problème lors de la requête supprimerRendezVous");
+            System.err.println(e.getMessage());
+        }
     }
 
     /**
